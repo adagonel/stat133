@@ -1,5 +1,9 @@
 ---
+<<<<<<< HEAD
 title: "Test file"
+=======
+title: "Git file"
+>>>>>>> 65de2522892491555e2f53f1a1a30a687461965e
 author: ""
 date: ""
 output: 
