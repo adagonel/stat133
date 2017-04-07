@@ -1,0 +1,137 @@
+---
+title: "BLS Regional and sectoral unemployment analysis - TEST 2"
+author: ''
+date: ''
+output:
+  pdf_document: default
+  html_document:
+    fig_height: 4
+    fig_width: 6
+---
+<!-- XXXXX -->
+```{r include=FALSE}
+library(DataComputing)
+library(mosaic)
+library(dplyr)
+library(tidyr)
+library(knitr)
+library(printr)
+
+setwd("C:\\Users\\M. Looter King Jr\\Desktop\\133 Desktop")
+```
+*Source file* 
+```{r, results='asis', echo=FALSE}
+includeSourceDocuments()
+```
+<!-- XXXXX -->
+
+# Load downloaded data
+
+1998 annual Census on Employment and Wages (CWE)
+```{r, results='hide'}
+a1998.csv <- "1998.annual.singlefile.csv"
+a1998 <- a1998.csv %>% 
+  read.file()
+```
+
+```{r, include = FALSE}
+head(a1998)
+```
+
+Industry title translations
+```{r}
+indu.csv <- "industry_titles.csv"
+indu <- indu.csv %>% 
+  read.file()
+
+head(indu)
+```
+
+Area title translations
+```{r}
+area.csv <- "area_titles.csv"
+area <- area.csv %>% 
+  read.file()
+
+head(area)
+```
+
+# Joining 1998 CWE and translation tables
+
+```{r}
+a1998.j <- a1998 %>%
+  left_join(indu, by="industry_code") %>%
+  left_join(., area, by="area_fips") %>%
+  select(-industry_code, -area_fips)
+```
+
+Variable names ([Descriptions](https://data.bls.gov/cew/doc/layouts/csv_annual_layout.htm))
+
+```{r}
+names(a1998.j)
+```
+
+Relevant variables:
+
+38 - area_title
+37 - industry_title
+4 - year
+8 - annual_avg_emplvl: "Annual average of monthly employment levels for a given year"
+13 - avg_annual_pay: "Average annual pay based on employment and wage levels for a given year."
+12 - annual_avg_wkly_wage: "Average weekly wage based on the 12-monthly employment levels and total annual wage levels."
+
+Location quotients: "Location quotients are ratios that allow an area's distribution of employment by industry, ownership, and size class to be compared to a reference area's distribution."
+16 - lq_annual_avg_emplvl
+21 - lq_avg_annual_pay
+20 - lq_annual_avg_wkly_wage
+
+
+```{r}
+colnames(a1998.j)[38] <- "Area"
+colnames(a1998.j)[37] <- "Industry"
+colnames(a1998.j)[4] <- "Year"
+colnames(a1998.j)[8] <- "Annual Employment Level"
+colnames(a1998.j)[16] <- "LQ Annual Employment"
+colnames(a1998.j)[13] <- "Average Annual Pay"
+colnames(a1998.j)[21] <- "LQ Annual Pay"
+colnames(a1998.j)[12] <- "Annual Weekly Wages"
+colnames(a1998.j)[20] <- "LQ Weekly Wages"
+
+head(a1998.j)
+```
+
+
+# Narrowing
+
+```{r}
+a1998.w <- a1998.j %>%
+  select(38, 37, 4, 8, 13, 12, 16, 21, 20) %>%
+
+head(a1998.w)
+```
+
+```{r}
+a1998.la_ca <- a1998.w %>%
+  filter(a1998.w[1] == 'Los Angeles County, California')
+```
+
+```{r}
+head(a1998.la_ca)
+```
+
+
+
+Test plot
+
+- Axises = Employment level by Annual pay
+- Points = Industry
+- Facets =
+
+```{r}
+la_ca_plot1.indu_emplev <- a1998.la_ca %>%
+  ggplot(aes(x = "Annual Employment Level", y = "Average Annual Pay")) +
+  geom_point(col = a1998.la_ca$Industry["Service providing"])
+
+la_ca_plot1.indu_emplev
+```
+
